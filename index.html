@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/qgis2web.css"><link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/filter.css">
+<link rel="stylesheet" href="css/nouislider.min.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title>BFFC_Plant_Collector (QFieldCloud)</title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/tailDT.js"></script>
+<script src="js/nouislider.min.js"></script>
+<script src="js/wNumb.js"></script>
+        <script src="data/PlantingType_2.js"></script>
+        <script src="data/PlantingLocations_3.js"></script>
+        <script>
+        var map = L.map('map', {
+            zoomControl:true, maxZoom:28, minZoom:1
+        })
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+            if (bounds_group.getLayers().length) {
+                map.fitBounds(bounds_group.getBounds());
+            }
+        }
+        map.createPane('pane_OpenStreetMap_0');
+        map.getPane('pane_OpenStreetMap_0').style.zIndex = 400;
+        var layer_OpenStreetMap_0 = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            pane: 'pane_OpenStreetMap_0',
+            opacity: 1.0,
+            attribution: '',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 19
+        });
+        layer_OpenStreetMap_0;
+        map.addLayer(layer_OpenStreetMap_0);
+        map.createPane('pane_GoogleSatellite_1');
+        map.getPane('pane_GoogleSatellite_1').style.zIndex = 401;
+        var layer_GoogleSatellite_1 = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            pane: 'pane_GoogleSatellite_1',
+            opacity: 0.72,
+            attribution: '',
+            minZoom: 1,
+            maxZoom: 28,
+        });
+        layer_GoogleSatellite_1;
+        map.addLayer(layer_GoogleSatellite_1);
+        function pop_PlantingType_2(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Species</th>\
+                        <td>' + (feature.properties['Species'] !== null ? autolinker.link(feature.properties['Species'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Health</th>\
+                        <td>' + (feature.properties['Health'] !== null ? autolinker.link(feature.properties['Health'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Last Pruned</th>\
+                        <td>' + (feature.properties['Last Prune'] !== null ? autolinker.link(feature.properties['Last Prune'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Type</th>\
+                        <td>' + (feature.properties['Type'] !== null ? autolinker.link(feature.properties['Type'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Date Planted</th>\
+                        <td>' + (feature.properties['Date Planted'] !== null ? autolinker.link(feature.properties['Date Planted'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_PlantingType_2_0(feature) {
+            switch(String(feature.properties['Type'])) {
+                case 'Tree':
+                    return {
+                pane: 'pane_PlantingType_2',
+                radius: 10.0,
+                opacity: 1,
+                color: 'rgba(86,86,86,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(0,68,255,0.34509803921568627)',
+                interactive: true,
+            }
+                    break;
+                case 'Vine':
+                    return {
+                pane: 'pane_PlantingType_2',
+                radius: 6.0,
+                opacity: 1,
+                color: 'rgba(92,92,92,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(223,113,45,0.6705882352941176)',
+                interactive: true,
+            }
+                    break;
+                case 'Shrub':
+                    return {
+                pane: 'pane_PlantingType_2',
+                radius: 8.0,
+                opacity: 1,
+                color: 'rgba(107,97,97,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(184,99,187,0.3607843137254902)',
+                interactive: true,
+            }
+                    break;
+                case 'Grass':
+                    return {
+                pane: 'pane_PlantingType_2',
+                radius: 6.0,
+                opacity: 1,
+                color: 'rgba(95,95,95,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(247,230,5,0.4470588235294118)',
+                interactive: true,
+            }
+                    break;
+                default:
+                    return {
+                pane: 'pane_PlantingType_2',
+                radius: 5.0,
+                opacity: 1,
+                color: 'rgba(94,94,94,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(121,121,132,0.5294117647058824)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_PlantingType_2');
+        map.getPane('pane_PlantingType_2').style.zIndex = 402;
+        map.getPane('pane_PlantingType_2').style['mix-blend-mode'] = 'normal';
+        var layer_PlantingType_2 = new L.geoJson(json_PlantingType_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_PlantingType_2',
+            layerName: 'layer_PlantingType_2',
+            pane: 'pane_PlantingType_2',
+            onEachFeature: pop_PlantingType_2,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.circleMarker(latlng, style_PlantingType_2_0(feature));
+            },
+        });
+        bounds_group.addLayer(layer_PlantingType_2);
+        map.addLayer(layer_PlantingType_2);
+        function pop_PlantingLocations_3(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Species</th>\
+                        <td>' + (feature.properties['Species'] !== null ? autolinker.link(feature.properties['Species'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Health</th>\
+                        <td>' + (feature.properties['Health'] !== null ? autolinker.link(feature.properties['Health'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Last Pruned</th>\
+                        <td>' + (feature.properties['Last Prune'] !== null ? autolinker.link(feature.properties['Last Prune'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Type</th>\
+                        <td>' + (feature.properties['Type'] !== null ? autolinker.link(feature.properties['Type'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Date Planted</th>\
+                        <td>' + (feature.properties['Date Planted'] !== null ? autolinker.link(feature.properties['Date Planted'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+        function style_PlantingLocations_3_0(feature) {
+            var context = {
+                feature: feature,
+                variables: {}
+            };
+            // Start of if blocks and style check logic
+            if (exp_PlantingLocations_3rule1_eval_expression(context)) {
+                  return {
+                pane: 'pane_PlantingLocations_3',
+                radius: 1.4,
+                opacity: 1,
+                color: 'rgba(204,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(204,0,0,1.0)',
+                interactive: false,
+            };
+                }
+            else {
+                return {
+                pane: 'pane_PlantingLocations_3',
+                radius: 1.4,
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(17,8,14,1.0)',
+                interactive: false,
+            };
+            }
+        }
+        map.createPane('pane_PlantingLocations_3');
+        map.getPane('pane_PlantingLocations_3').style.zIndex = 403;
+        map.getPane('pane_PlantingLocations_3').style['mix-blend-mode'] = 'normal';
+        var layer_PlantingLocations_3 = new L.geoJson(json_PlantingLocations_3, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_PlantingLocations_3',
+            layerName: 'layer_PlantingLocations_3',
+            pane: 'pane_PlantingLocations_3',
+            onEachFeature: pop_PlantingLocations_3,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.circleMarker(latlng, style_PlantingLocations_3_0(feature));
+            },
+        });
+        bounds_group.addLayer(layer_PlantingLocations_3);
+        map.addLayer(layer_PlantingLocations_3);
+            var title = new L.Control();
+            title.onAdd = function (map) {
+                this._div = L.DomUtil.create('div', 'info');
+                this.update();
+                return this._div;
+            };
+            title.update = function () {
+                this._div.innerHTML = '<h2>BFFC_Plant_Collector (QFieldCloud)</h2>';
+            };
+            title.addTo(map);
+        var baseMaps = {};
+        L.control.layers(baseMaps,{'Planting Locations<br /><table><tr><td style="text-align: center;"><img src="legend/PlantingLocations_3_OlderPlantings0.png" /></td><td>Older Plantings</td></tr><tr><td style="text-align: center;"><img src="legend/PlantingLocations_3_PlantedWithinLastYear1.png" /></td><td>Planted Within Last Year</td></tr></table>': layer_PlantingLocations_3,'Planting Type<br /><table><tr><td style="text-align: center;"><img src="legend/PlantingType_2_Tree0.png" /></td><td>Tree</td></tr><tr><td style="text-align: center;"><img src="legend/PlantingType_2_Vine1.png" /></td><td>Vine</td></tr><tr><td style="text-align: center;"><img src="legend/PlantingType_2_Shrub2.png" /></td><td>Shrub</td></tr><tr><td style="text-align: center;"><img src="legend/PlantingType_2_Grass3.png" /></td><td>Grass</td></tr><tr><td style="text-align: center;"><img src="legend/PlantingType_2_UnknownType4.png" /></td><td>Unknown Type</td></tr></table>': layer_PlantingType_2,"Google Satellite": layer_GoogleSatellite_1,"OpenStreetMap": layer_OpenStreetMap_0,},{collapsed:false}).addTo(map);
+        setBounds();
+        var mapDiv = document.getElementById('map');
+        var row = document.createElement('div');
+        row.className="row";
+        row.id="all";
+        row.style.height = "100%";
+        var col1 = document.createElement('div');
+        col1.className="col9";
+        col1.id = "mapWindow";
+        col1.style.height = "99%";
+        col1.style.width = "80%";
+        col1.style.display = "inline-block";
+        var col2 = document.createElement('div');
+        col2.className="col3";
+        col2.id = "menu";
+        col2.style.display = "inline-block";
+        mapDiv.parentNode.insertBefore(row, mapDiv);
+        document.getElementById("all").appendChild(col1);
+        document.getElementById("all").appendChild(col2);
+        col1.appendChild(mapDiv)
+        var Filters = {"Species": "str"};
+        function filterFunc() {
+          map.eachLayer(function(lyr){
+          if ("options" in lyr && "dataVar" in lyr["options"]){
+            features = this[lyr["options"]["dataVar"]].features.slice(0);
+            try{
+              for (key in Filters){
+                keyS = key.replace(/[^a-zA-Z0-9_]/g, "")
+                if (Filters[key] == "str" || Filters[key] == "bool"){
+                  var selection = [];
+                  var options = document.getElementById("sel_" + keyS).options
+                  for (var i=0; i < options.length; i++) {
+                    if (options[i].selected) selection.push(options[i].value);
+                  }
+                    try{
+                      if (key in features[0].properties){
+                        for (i = features.length - 1;
+                          i >= 0; --i){
+                          if (selection.indexOf(
+                          features[i].properties[key])<0
+                          && selection.length>0) {
+                          features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                  }
+                }
+                if (Filters[key] == "int"){
+                  sliderVals =  document.getElementById(
+                    "div_" + keyS).noUiSlider.get();
+                  try{
+                    if (key in features[0].properties){
+                    for (i = features.length - 1; i >= 0; --i){
+                      if (parseInt(features[i].properties[key])
+                          < sliderVals[0]
+                          || parseInt(features[i].properties[key])
+                          > sliderVals[1]){
+                            features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                    }
+                  }
+                if (Filters[key] == "real"){
+                  sliderVals =  document.getElementById(
+                    "div_" + keyS).noUiSlider.get();
+                  try{
+                    if (key in features[0].properties){
+                    for (i = features.length - 1; i >= 0; --i){
+                      if (features[i].properties[key]
+                          < sliderVals[0]
+                          || features[i].properties[key]
+                          > sliderVals[1]){
+                            features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                    }
+                  }
+                if (Filters[key] == "date"
+                  || Filters[key] == "datetime"
+                  || Filters[key] == "time"){
+                  try{
+                    if (key in features[0].properties){
+                      HTMLkey = key.replace(/[&\/\\#,+()$~%.'":*?<>{} ]/g, '');
+                      startdate = document.getElementById("dat_" +
+                        HTMLkey + "_date1").value.replace(" ", "T");
+                      enddate = document.getElementById("dat_" +
+                        HTMLkey + "_date2").value.replace(" ", "T");
+                      for (i = features.length - 1; i >= 0; --i){
+                        if (features[i].properties[key] < startdate
+                          || features[i].properties[key] > enddate){
+                          features.splice(i,1);
+                        }
+                      }
+                    }
+                  } catch(err){
+                  }
+                }
+              }
+            } catch(err){
+            }
+          this[lyr["options"]["layerName"]].clearLayers();
+          this[lyr["options"]["layerName"]].addData(features);
+          }
+          })
+        }
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_Species = document.createElement('div');
+            div_Species.id = "div_Species";
+            div_Species.className= "filterselect";
+            document.getElementById("menu").appendChild(div_Species);
+            sel_Species = document.createElement('select');
+            sel_Species.multiple = true;
+            sel_Species.size = 10;
+            sel_Species.id = "sel_Species";
+            var Species_options_str = "<option value='' unselected></option>";
+            sel_Species.onchange = function(){filterFunc()};
+            Species_options_str  += '<option value="American Chestnut">American Chestnut</option>';
+            Species_options_str  += '<option value="American Cranberrybush">American Cranberrybush</option>';
+            Species_options_str  += '<option value="American Hazelnut">American Hazelnut</option>';
+            Species_options_str  += '<option value="American Persimmon">American Persimmon</option>';
+            Species_options_str  += '<option value="American Plum">American Plum</option>';
+            Species_options_str  += '<option value="Apple">Apple</option>';
+            Species_options_str  += '<option value="Apricot">Apricot</option>';
+            Species_options_str  += '<option value="Aronia">Aronia</option>';
+            Species_options_str  += '<option value="Asian Pear">Asian Pear</option>';
+            Species_options_str  += '<option value="Asian Plum">Asian Plum</option>';
+            Species_options_str  += '<option value="Asparagus">Asparagus</option>';
+            Species_options_str  += '<option value="Beach Plum">Beach Plum</option>';
+            Species_options_str  += '<option value="Black Walnut">Black Walnut</option>';
+            Species_options_str  += '<option value="Blackberry">Blackberry</option>';
+            Species_options_str  += '<option value="Blueberry">Blueberry</option>';
+            Species_options_str  += '<option value="Box Elder">Box Elder</option>';
+            Species_options_str  += '<option value="Boxelder Maple">Boxelder Maple</option>';
+            Species_options_str  += '<option value="Butternut">Butternut</option>';
+            Species_options_str  += '<option value="Callery Pear">Callery Pear</option>';
+            Species_options_str  += '<option value="Chives">Chives</option>';
+            Species_options_str  += '<option value="Common Pear">Common Pear</option>';
+            Species_options_str  += '<option value="Cornelian Cherry">Cornelian Cherry</option>';
+            Species_options_str  += '<option value="Cornelian Cherry ">Cornelian Cherry </option>';
+            Species_options_str  += '<option value="Crabapple">Crabapple</option>';
+            Species_options_str  += '<option value="Cranberry Viburnum">Cranberry Viburnum</option>';
+            Species_options_str  += '<option value="Currant">Currant</option>';
+            Species_options_str  += '<option value="Domestic Apple">Domestic Apple</option>';
+            Species_options_str  += '<option value="Domestic apple">Domestic apple</option>';
+            Species_options_str  += '<option value="Elderberry">Elderberry</option>';
+            Species_options_str  += '<option value="Elm">Elm</option>';
+            Species_options_str  += '<option value="Fig">Fig</option>';
+            Species_options_str  += '<option value="Fragrant Shadblow">Fragrant Shadblow</option>';
+            Species_options_str  += '<option value="French Prune Plum">French Prune Plum</option>';
+            Species_options_str  += '<option value="Goji berry">Goji berry</option>';
+            Species_options_str  += '<option value="Grape">Grape</option>';
+            Species_options_str  += '<option value="Hackberry">Hackberry</option>';
+            Species_options_str  += '<option value="Hazelnut">Hazelnut</option>';
+            Species_options_str  += '<option value="Heartnut">Heartnut</option>';
+            Species_options_str  += '<option value="Hibiscus">Hibiscus</option>';
+            Species_options_str  += '<option value="Hickory">Hickory</option>';
+            Species_options_str  += '<option value="Highbush Cranberry">Highbush Cranberry</option>';
+            Species_options_str  += '<option value="Honey berry">Honey berry</option>';
+            Species_options_str  += '<option value="Huckelberry">Huckelberry</option>';
+            Species_options_str  += '<option value="Juniper">Juniper</option>';
+            Species_options_str  += '<option value="Kousa Dogwood">Kousa Dogwood</option>';
+            Species_options_str  += '<option value="Montgomery Sour Cherry">Montgomery Sour Cherry</option>';
+            Species_options_str  += '<option value="Mulberry">Mulberry</option>';
+            Species_options_str  += '<option value="Nanking Cherry">Nanking Cherry</option>';
+            Species_options_str  += '<option value="Nannyberry">Nannyberry</option>';
+            Species_options_str  += '<option value="Northern Bayberry">Northern Bayberry</option>';
+            Species_options_str  += '<option value="Norway Maple">Norway Maple</option>';
+            Species_options_str  += '<option value="Oak trees">Oak trees</option>';
+            Species_options_str  += '<option value="Passionfruit">Passionfruit</option>';
+            Species_options_str  += '<option value="Pawpaw">Pawpaw</option>';
+            Species_options_str  += '<option value="Peach">Peach</option>';
+            Species_options_str  += '<option value="Pecan">Pecan</option>';
+            Species_options_str  += '<option value="Persimmon">Persimmon</option>';
+            Species_options_str  += '<option value="Plum">Plum</option>';
+            Species_options_str  += '<option value="Pussy Willow">Pussy Willow</option>';
+            Species_options_str  += '<option value="Raspberry">Raspberry</option>';
+            Species_options_str  += '<option value="Seaberry">Seaberry</option>';
+            Species_options_str  += '<option value="Seckel Pear">Seckel Pear</option>';
+            Species_options_str  += '<option value="Serviceberry">Serviceberry</option>';
+            Species_options_str  += '<option value="Shadblow Serviceberry">Shadblow Serviceberry</option>';
+            Species_options_str  += '<option value="Shagbark Hickory">Shagbark Hickory</option>';
+            Species_options_str  += '<option value="Siberian Peashrub">Siberian Peashrub</option>';
+            Species_options_str  += '<option value="Sour Cherry">Sour Cherry</option>';
+            Species_options_str  += '<option value="Spice Bush">Spice Bush</option>';
+            Species_options_str  += '<option value="Sweet Cherry">Sweet Cherry</option>';
+            Species_options_str  += '<option value="Turkish hazelnut">Turkish hazelnut</option>';
+            Species_options_str  += '<option value="Wild Black Cherry">Wild Black Cherry</option>';
+            Species_options_str  += '<option value="Wild Senna">Wild Senna</option>';
+            sel_Species.innerHTML = Species_options_str;
+            div_Species.appendChild(sel_Species);
+            var lab_Species = document.createElement('div');
+            lab_Species.innerHTML = 'Species';
+            lab_Species.className = 'filterlabel';
+            div_Species.appendChild(lab_Species);
+            var reset_Species = document.createElement('div');
+            reset_Species.innerHTML = 'clear filter';
+            reset_Species.className = 'filterlabel';
+            reset_Species.onclick = function() {
+                var options = document.getElementById("sel_Species").options;
+                for (var i=0; i < options.length; i++) {
+                    options[i].selected = false;
+                }
+                filterFunc();
+            };
+            div_Species.appendChild(reset_Species);
+        resetLabels([layer_PlantingType_2,layer_PlantingLocations_3]);
+        map.on("zoomend", function(){
+            resetLabels([layer_PlantingType_2,layer_PlantingLocations_3]);
+        });
+        map.on("layeradd", function(){
+            resetLabels([layer_PlantingType_2,layer_PlantingLocations_3]);
+        });
+        map.on("layerremove", function(){
+            resetLabels([layer_PlantingType_2,layer_PlantingLocations_3]);
+        });
+        </script>
+    </body>
+</html>
